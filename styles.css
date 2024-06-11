@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #8d8a8a;
     margin: 0;
     padding: 0;
 }
@@ -8,10 +8,14 @@ body {
 .container {
     max-width: 400px;
     margin: 50px auto;
-    background-color: #fff;
+    background-color: #000000;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: gold;
+    opacity: 0; /* Initially hidden */
+    transform: translateY(20px); /* Initial position */
+    animation: fadeInUp 1s ease-out forwards; /* Animation */
 }
 
 h2 {
@@ -41,12 +45,20 @@ button {
     border: none;
     border-radius: 4px;
     background-color: #4CAF50;
-    color: #fff;
+    color: #e00ac4;
     cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+    font-size: larger;
+    opacity: 0; /* Initially hidden */
+    transform: translateY(10px); /* Initial position */
+    animation: fadeInUpButton 1.5s ease-out forwards; /* Animation */
+    transition: transform 0.3s ease; /* Smooth transform transition */
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #deebdf;
+    transform: scale(1.05); /* Slightly increase size on hover */
 }
 
 #result {
@@ -55,4 +67,26 @@ button:hover {
     border: 1px solid #ccc;
     border-radius: 4px;
     background-color: #f9f9f9;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUpButton {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
