@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tile Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Tile Calculator made by kakeeto</h2>
+        <div class="input-group">
+            <label for="room-length">Room Length (in feet):</label>
+            <input type="number" id="room-length" placeholder="Enter length">
+        </div>
+        <div class="input-group">
+            <label for="room-width">Room Width (in feet):</label>
+            <input type="number" id="room-width" placeholder="Enter width">
+        </div>
+        <div class="input-group">
+            <label for="tile-length">Tile Length (in cm):</label>
+            <input type="number" id="tile-length" placeholder="Enter length">
+        </div>
+        <div class="input-group">
+            <label for="tile-width">Tile Width (in cm):</label>
+            <input type="number" id="tile-width" placeholder="Enter width">
+        </div>
+        <div class="input-group">
+            <label for="tiles-per-box">Number of Tiles per Box:</label>
+            <input type="number" id="tiles-per-box" placeholder="Enter number">
+        </div>
+        <button id="calculate-btn">Calculate</button>
+        <div id="result"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
