@@ -1,38 +1,518 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tile Calculator</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aviator Game Simulation</title>
+<link href="https://fonts.cdnfonts.com/css/binance-sans" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg-color: #1a1a1a;
+  --container-bg: #242424;
+  --accent-color: #0080ff;
+  --hover-color: #006bb3;
+  --text-color: #fff;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --border-radius: 12px;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Binance Sans', sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+.container {
+  width: 90%;
+  max-width: 480px;
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--container-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+}
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #2b2b2b;
+  border-radius: var(--border-radius);
+  margin-bottom: 15px;
+}
+.account-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.account-icon { font-size: 28px; }
+.balance-container {
+  background: #333;
+  padding: 5px 10px;
+  border-radius: var(--border-radius);
+}
+.balance-text { font-size: 18px; font-weight: bold; }
+.account-actions {
+  display: flex;
+  gap: 10px;
+}
+.account-actions button {
+  background: var(--accent-color);
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+.account-actions button:hover { background: var(--hover-color); }
+.round-timer {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+.game-area {
+  position: relative;
+  margin: 20px auto;
+  width: 80vw;
+  height: 80vw;
+  max-width: 300px;
+  max-height: 300px;
+  border: 2px solid #444;
+  border-radius: 50%;
+  background: radial-gradient(circle, #333, #1a1a1a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.multiplier-display {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  font-size: 48px;
+  font-weight: bold;
+  z-index: 2;
+}
+.airplane {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 36px;
+}
+.winnings {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 24px;
+  font-weight: bold;
+}
+.controls {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+.stakes {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  justify-content: space-between;
+}
+.bet-section {
+  flex: 1;
+  background: #2b2b2b;
+  padding: 10px;
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.bet-section label { font-size: 14px; }
+.bet-section input {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--border-radius);
+  border: none;
+  text-align: center;
+  font-size: 16px;
+}
+.bet-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+button {
+  background: var(--accent-color);
+  border: none;
+  padding: 10px 15px;
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+button:hover { background: var(--hover-color); transform: scale(1.02); }
+button:disabled { background: #555; cursor: not-allowed; transform: none; }
+.next-crash, .result { text-align: center; margin-top: 10px; font-size: 18px; }
+.win { color: #00ff00; }
+.loss { color: #ff4444; }
+.virtual-players, .recent-multipliers {
+  width: 90%;
+  max-width: 480px;
+  background: var(--container-bg);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  box-shadow: var(--card-shadow);
+  margin: 20px auto;
+}
+.virtual-players h3, .recent-multipliers h3 {
+  text-align: center;
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+.virtual-players ul, .recent-multipliers ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.virtual-players li, .recent-multipliers li {
+  font-size: 16px;
+  margin: 5px 0;
+}
+#loading-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: var(--border-radius);
+  z-index: 1000;
+  display: none;
+}
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--accent-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@media (max-width: 600px) {
+  .multiplier-display { font-size: 36px; }
+  .airplane { font-size: 28px; }
+  .winnings { font-size: 20px; }
+  .balance-text { font-size: 16px; }
+  button { font-size: 14px; padding: 8px 12px; }
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h2>Tile Calculator made by kakeeto</h2>
-        <div class="input-group">
-            <label for="room-length">Room Length (in feet):</label>
-            <input type="number" id="room-length" placeholder="Enter length">
-        </div>
-        <div class="input-group">
-            <label for="room-width">Room Width (in feet):</label>
-            <input type="number" id="room-width" placeholder="Enter width">
-        </div>
-        <div class="input-group">
-            <label for="tile-length">Tile Length (in cm):</label>
-            <input type="number" id="tile-length" placeholder="Enter length">
-        </div>
-        <div class="input-group">
-            <label for="tile-width">Tile Width (in cm):</label>
-            <input type="number" id="tile-width" placeholder="Enter width">
-        </div>
-        <div class="input-group">
-            <label for="tiles-per-box">Number of Tiles per Box:</label>
-            <input type="number" id="tiles-per-box" placeholder="Enter number">
-        </div>
-        <button id="calculate-btn">Calculate</button>
-        <div id="result"></div>
+<div class="container">
+  <div class="account-header">
+    <div class="account-info">
+      <span class="account-icon">👤</span>
+      <div class="balance-container">
+        <span class="balance-text">Balance: UGX <span id="balance">100,000.00</span></span>
+      </div>
     </div>
-
-    <script src="script.js"></script>
+    <div class="account-actions">
+      <button id="deposit-btn">Deposit</button>
+      <button id="withdraw-btn">Withdraw</button>
+    </div>
+  </div>
+  <div class="round-timer">
+    Next round starts in: <span id="countdown-timer">10</span> seconds
+  </div>
+  <div class="game-area">
+    <div class="multiplier-display" id="multiplier">1.00x</div>
+    <div class="airplane" id="airplane">⚽</div>
+  </div>
+  <div class="winnings">Potential Winnings: UGX <span id="winnings">0.00</span></div>
+  <div class="controls">
+    <div class="stakes">
+      <div class="bet-section">
+        <label for="bet-amount-1">Stake : Bet UGX</label>
+        <input type="number" id="bet-amount-1" min="1" value="10000" />
+        <label for="auto-cashout-1">Auto Cash Out at</label>
+        <input type="number" id="auto-cashout-1" step="0.01" min="1.01" value="1.50" />
+        <div class="toggle-container">
+          <label for="toggle-autocashout-1">Auto Cash Out</label>
+          <input type="checkbox" id="toggle-autocashout-1">
+        </div>
+        <div class="bet-buttons">
+          <button class="place-bet-btn" data-bet="1">Place Bet</button>
+          <button class="cashout-btn" id="cashout-btn-1" disabled>Cash Out</button>
+        </div>
+      </div>
+      <div class="bet-section">
+        <label for="bet-amount-2">Stake : Bet UGX</label>
+        <input type="number" id="bet-amount-2" min="1" value="10000" />
+        <label for="auto-cashout-2">Auto Cash Out at</label>
+        <input type="number" id="auto-cashout-2" step="0.01" min="1.01" value="2.00" />
+        <div class="toggle-container">
+          <label for="toggle-autocashout-2">Auto Cash Out</label>
+          <input type="checkbox" id="toggle-autocashout-2">
+        </div>
+        <div class="bet-buttons">
+          <button class="place-bet-btn" data-bet="2">Place Bet</button>
+          <button class="cashout-btn" id="cashout-btn-2" disabled>Cash Out</button>
+        </div>
+      </div>
+    </div>
+    <button id="start-btn">Start Round Now</button>
+    <button id="cashout-all-btn" disabled>Cash Out All</button>
+  </div>
+  <div class="next-crash">Next Crash: <span id="next-crash">?</span>x</div>
+  <div class="result" id="result"></div>
+</div>
+<div class="virtual-players">
+  <h3>Live Bets</h3>
+  <ul id="players-list"></ul>
+</div>
+<div class="recent-multipliers">
+  <h3>Recent Multipliers</h3>
+  <ul id="multipliers-list"></ul>
+  <button id="save-pdf-btn">Save Multipliers as PDF</button>
+</div>
+<div id="loading-spinner">
+  <div class="spinner"></div>
+</div>
+<script>
+let balance = 100000;
+let multiplier = 1.0;
+let simulationInterval;
+let roundCountdownInterval;
+let roundCountdownTime = 10;
+let crashed = false;
+let bets = [];
+let nextCrashMultiplier = generateCrashMultiplier();
+let verticalDirection = 1;
+let verticalSpeed = 0.5;
+let ballDirectionX = 1;
+let horizontalSpeed = 0.3;
+let recentMultipliers = [];
+const balanceDisplay = document.getElementById('balance');
+const multiplierDisplay = document.getElementById('multiplier');
+const airplane = document.getElementById('airplane');
+const winningsDisplay = document.getElementById('winnings');
+const startBtn = document.getElementById('start-btn');
+const cashoutAllBtn = document.getElementById('cashout-all-btn');
+const depositBtn = document.getElementById('deposit-btn');
+const withdrawBtn = document.getElementById('withdraw-btn');
+const nextCrashDisplay = document.getElementById('next-crash');
+const resultDisplay = document.getElementById('result');
+const playersList = document.getElementById('players-list');
+const countdownTimerDisplay = document.getElementById('countdown-timer');
+const loadingSpinner = document.getElementById('loading-spinner');
+const multipliersList = document.getElementById('multipliers-list');
+const savePdfBtn = document.getElementById('save-pdf-btn');
+function formatCurrency(amount) { return amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function showLoadingSpinner() { loadingSpinner.style.display = 'block'; }
+function hideLoadingSpinner() { loadingSpinner.style.display = 'none'; }
+function generateCrashMultiplier() { const maxMultiplier = 100000; const u = Math.random() * (1 - 1 / maxMultiplier); const m = 1 / (1 - u); return parseFloat(m.toFixed(2)); }
+function updateWinnings() {
+  if (bets.length > 0) {
+    let totalPotential = 0;
+    bets.forEach(bet => { if (!bet.hasCashedOut) { totalPotential += bet.amount * multiplier; } });
+    winningsDisplay.textContent = formatCurrency(totalPotential);
+  } else { winningsDisplay.textContent = "0.00"; }
+}
+function updateMultipliersList() {
+  multipliersList.innerHTML = "";
+  for (let i = recentMultipliers.length - 1; i >= 0; i--) {
+    const li = document.createElement("li");
+    li.textContent = parseFloat(recentMultipliers[i].multiplier).toFixed(2);
+    if (recentMultipliers[i].status === 'win') { li.style.color = 'green'; }
+    else if (recentMultipliers[i].status === 'loss') { li.style.color = 'red'; }
+    else { li.style.color = 'white'; }
+    multipliersList.appendChild(li);
+  }
+}
+function startRoundProcess() {
+  crashed = false;
+  multiplier = 1.0;
+  resultDisplay.textContent = '';
+  resultDisplay.classList.remove("win", "loss");
+  multiplierDisplay.textContent = `${multiplier.toFixed(2)}x`;
+  winningsDisplay.textContent = bets.length > 0 ? formatCurrency(bets.reduce((total, bet) => total + (bet.amount * multiplier), 0)) : "0.00";
+  airplane.style.bottom = `10%`;
+  airplane.style.left = `50%`;
+  verticalDirection = 1;
+  ballDirectionX = 1;
+  startBtn.disabled = true;
+  document.querySelectorAll('.place-bet-btn').forEach(btn => btn.disabled = true);
+  cashoutAllBtn.disabled = bets.length === 0;
+  clearInterval(roundCountdownInterval);
+  countdownTimerDisplay.textContent = "0";
+  simulationInterval = setInterval(() => {
+    if (multiplier < 2) { multiplier = multiplier * (1 + Math.random() * 0.015); }
+    else { multiplier = multiplier * (1 + Math.random() * 0.045); }
+    multiplierDisplay.textContent = `${multiplier.toFixed(2)}x`;
+    updateWinnings();
+    const container = document.querySelector('.game-area');
+    const containerHeight = container.offsetHeight;
+    const airplaneHeight = airplane.offsetHeight;
+    const maxBottomPercent = ((containerHeight - airplaneHeight) / containerHeight) * 100;
+    const minBottomPercent = 10;
+    let currentBottom = parseFloat(airplane.style.bottom);
+    let newBottom = currentBottom + verticalSpeed * verticalDirection;
+    if (newBottom >= maxBottomPercent) { newBottom = maxBottomPercent; verticalDirection = -1; }
+    else if (newBottom <= minBottomPercent) { newBottom = minBottomPercent; verticalDirection = 1; }
+    airplane.style.bottom = `${newBottom}%`;
+    let currentLeft = parseFloat(airplane.style.left);
+    if (isNaN(currentLeft)) currentLeft = 50;
+    const minLeftPercent = 20;
+    const maxLeftPercent = 80;
+    let newLeft = currentLeft + horizontalSpeed * ballDirectionX;
+    if (newLeft >= maxLeftPercent) { newLeft = maxLeftPercent; ballDirectionX = -1; }
+    else if (newLeft <= minLeftPercent) { newLeft = minLeftPercent; ballDirectionX = 1; }
+    airplane.style.left = `${newLeft}%`;
+    bets.forEach(bet => {
+      if (!bet.hasCashedOut && bet.autoEnabled && multiplier >= bet.autoCashOut) {
+        bet.lockedMultiplier = multiplier;
+        bet.hasCashedOut = true;
+        const winnings = bet.amount * multiplier;
+        balance += winnings;
+        balanceDisplay.textContent = formatCurrency(balance);
+        resultDisplay.innerHTML += `<br><span class="win">Bet ${bet.id}: Auto cashed out at ${multiplier.toFixed(2)}x! Won UGX ${formatCurrency(winnings)}.</span>`;
+        document.getElementById('cashout-btn-' + bet.id).disabled = true;
+      }
+    });
+    if (multiplier >= nextCrashMultiplier) { crash(); }
+  }, 100);
+}
+cashoutAllBtn.addEventListener('click', () => {
+  bets.forEach(bet => {
+    if (!bet.hasCashedOut) {
+      bet.lockedMultiplier = multiplier;
+      bet.hasCashedOut = true;
+      const winnings = bet.amount * multiplier;
+      balance += winnings;
+      resultDisplay.innerHTML += `<br><span class="win">Bet ${bet.id}: Cashed out at ${multiplier.toFixed(2)}x! Won UGX ${formatCurrency(winnings)}.</span>`;
+      document.getElementById('cashout-btn-' + bet.id).disabled = true;
+    }
+  });
+  balanceDisplay.textContent = formatCurrency(balance);
+  cashoutAllBtn.disabled = true;
+});
+function crash() {
+  crashed = true;
+  clearInterval(simulationInterval);
+  bets.forEach(bet => { if (!bet.hasCashedOut) { resultDisplay.innerHTML += `<br><span class="loss">Bet ${bet.id}: Crashed at ${multiplier.toFixed(2)}x! Lost UGX ${bet.amount.toFixed(2)}.</span>`; } });
+  recentMultipliers.push({ multiplier: parseFloat(multiplier.toFixed(2)), status: bets.some(b => b.hasCashedOut) ? 'win' : 'loss' });
+  if (recentMultipliers.length > 100) { recentMultipliers.shift(); }
+  updateMultipliersList();
+  startBtn.disabled = false;
+  cashoutAllBtn.disabled = true;
+  bets = [];
+  document.querySelectorAll('.place-bet-btn').forEach(btn => btn.disabled = false);
+  document.querySelectorAll('.cashout-btn').forEach(btn => btn.disabled = true);
+  nextCrashMultiplier = generateCrashMultiplier();
+  nextCrashDisplay.textContent = nextCrashMultiplier;
+  setTimeout(startCountdown, 3000);
+}
+function startCountdown() {
+  roundCountdownTime = 7;
+  countdownTimerDisplay.textContent = roundCountdownTime;
+  roundCountdownInterval = setInterval(() => {
+    roundCountdownTime--;
+    countdownTimerDisplay.textContent = roundCountdownTime;
+    if (roundCountdownTime <= 0) { clearInterval(roundCountdownInterval); startRoundProcess(); }
+  }, 1000);
+}
+document.querySelectorAll('.place-bet-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const betId = this.dataset.bet;
+    const betInput = document.getElementById(`bet-amount-${betId}`);
+    const autoInput = document.getElementById(`auto-cashout-${betId}`);
+    const toggleInput = document.getElementById(`toggle-autocashout-${betId}`);
+    const betAmount = parseFloat(betInput.value);
+    const autoCashOutValue = parseFloat(autoInput.value);
+    const autoEnabled = toggleInput.checked;
+    if (isNaN(betAmount) || betAmount <= 0) { alert("Invalid bet amount!"); return; }
+    if (betAmount > balance) { alert("Insufficient balance!"); return; }
+    if (isNaN(autoCashOutValue) || autoCashOutValue <= 1) { alert("Invalid auto cash out value! It must be greater than 1.00"); return; }
+    balance -= betAmount;
+    balanceDisplay.textContent = formatCurrency(balance);
+    const bet = { id: betId, amount: betAmount, autoCashOut: autoCashOutValue, autoEnabled: autoEnabled, hasCashedOut: false, lockedMultiplier: 0 };
+    bets.push(bet);
+    this.disabled = true;
+    document.getElementById('cashout-btn-' + betId).disabled = false;
+    cashoutAllBtn.disabled = false;
+  });
+});
+document.getElementById('cashout-btn-1').addEventListener('click', () => {
+  let bet = bets.find(b => b.id === "1");
+  if (bet && !bet.hasCashedOut) {
+    bet.lockedMultiplier = multiplier;
+    bet.hasCashedOut = true;
+    const winnings = bet.amount * multiplier;
+    balance += winnings;
+    balanceDisplay.textContent = formatCurrency(balance);
+    resultDisplay.innerHTML += `<br><span class="win">Bet ${bet.id}: Manually cashed out at ${multiplier.toFixed(2)}x! Won UGX ${formatCurrency(winnings)}.</span>`;
+    document.getElementById('cashout-btn-1').disabled = true;
+  }
+});
+document.getElementById('cashout-btn-2').addEventListener('click', () => {
+  let bet = bets.find(b => b.id === "2");
+  if (bet && !bet.hasCashedOut) {
+    bet.lockedMultiplier = multiplier;
+    bet.hasCashedOut = true;
+    const winnings = bet.amount * multiplier;
+    balance += winnings;
+    balanceDisplay.textContent = formatCurrency(balance);
+    resultDisplay.innerHTML += `<br><span class="win">Bet ${bet.id}: Manually cashed out at ${multiplier.toFixed(2)}x! Won UGX ${formatCurrency(winnings)}.</span>`;
+    document.getElementById('cashout-btn-2').disabled = true;
+  }
+});
+depositBtn.addEventListener('click', () => {
+  const depositAmount = prompt("Enter deposit amount (UGX):");
+  const amount = parseFloat(depositAmount);
+  if (!isNaN(amount) && amount > 0) { balance += amount; balanceDisplay.textContent = formatCurrency(balance); alert(`Deposit of UGX ${amount.toFixed(2)} successful!`); }
+  else { alert("Invalid deposit amount!"); }
+});
+withdrawBtn.addEventListener('click', () => {
+  const withdrawAmount = prompt("Enter withdrawal amount (UGX):");
+  const amount = parseFloat(withdrawAmount);
+  if (!isNaN(amount) && amount > 0 && amount <= balance) {
+    showLoadingSpinner();
+    setTimeout(() => { hideLoadingSpinner(); balance -= amount; balanceDisplay.textContent = formatCurrency(balance); alert(`Withdrawal of UGX ${amount.toFixed(2)} successful! Please check your mobile money account in 5 minutes.`); }, 2000);
+  } else { alert("Invalid withdrawal amount!"); }
+});
+savePdfBtn.addEventListener('click', () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(12);
+  doc.text("Recent Multipliers", 10, 10);
+  let y = 20;
+  recentMultipliers.forEach((entry, index) => {
+    const multiplierText = `${index + 1}. ${parseFloat(entry.multiplier).toFixed(2)}`;
+    doc.text(multiplierText, 10, y);
+    y += 10;
+    if (y > 280) { doc.addPage(); y = 10; }
+  });
+  doc.save('recent_multipliers.pdf');
+});
+startCountdown();
+nextCrashDisplay.textContent = nextCrashMultiplier;
+</script>
 </body>
 </html>
