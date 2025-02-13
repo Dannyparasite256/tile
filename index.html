@@ -217,7 +217,7 @@
   <div id="loading-spinner">
     <div class="spinner"></div>
   </div>
-   <script>
+      <script>
     let balance = 100000;
     let multiplier = 1.0;
     let simulationInterval;
@@ -471,4 +471,64 @@
       }
     });
     
-    document.getElementById('
+    document.getElementById('cashout-btn-2').addEventListener('click', () => {
+      let bet = bets.find(b => b.id === "2");
+      if (bet && !bet.hasCashedOut) {
+        bet.lockedMultiplier = multiplier;
+        bet.hasCashedOut = true;
+        const winnings = bet.amount * multiplier;
+        balance += winnings;
+        balanceDisplay.textContent = formatCurrency(balance);
+        resultDisplay.innerHTML += `<br><span class="win">Bet ${bet.id}: Manually cashed out at ${multiplier.toFixed(2)}x! Won UGX ${formatCurrency(winnings)}.</span>`;
+        document.getElementById('cashout-btn-2').disabled = true;
+      }
+    });
+    
+    depositBtn.addEventListener('click', () => {
+      const depositAmount = prompt("Enter deposit amount (UGX):");
+      const amount = parseFloat(depositAmount);
+      if (!isNaN(amount) && amount > 0) {
+        balance += amount;
+        balanceDisplay.textContent = formatCurrency(balance);
+        alert(`Deposit of UGX ${amount.toFixed(2)} successful!`);
+      } else { 
+        alert("Invalid deposit amount!"); 
+      }
+    });
+    
+    withdrawBtn.addEventListener('click', () => {
+      const withdrawAmount = prompt("Enter withdraw amount (UGX):");
+      const amount = parseFloat(withdrawAmount);
+      if (!isNaN(amount) && amount > 0 && amount <= balance) {
+        balance -= amount;
+        balanceDisplay.textContent = formatCurrency(balance);
+        alert(`Withdrawal of UGX ${amount.toFixed(2)} successful!`);
+      } else { 
+        alert("Invalid or insufficient funds for withdrawal!"); 
+      }
+    });
+    
+    savePdfBtn.addEventListener('click', () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+      doc.text("Recent Multipliers", 10, y);
+      y += 10;
+      recentMultipliers.slice().reverse().forEach(item => {
+        doc.text(`Multiplier: ${item.multiplier.toFixed(2)} - ${item.status.toUpperCase()}`, 10, y);
+        y += 10;
+      });
+      doc.save("recent_multipliers.pdf");
+    });
+    
+    // Start the first countdown.
+    startCountdown();
+    
+    // For testing purposes you can call these functions in the console:
+    // removeNextCrashDisplay(); // Hides the Next Crash display.
+    // bringBackNextCrashDisplay(); // Shows the Next Crash display.
+    
+  </script>
+</body>
+</html>
+    
