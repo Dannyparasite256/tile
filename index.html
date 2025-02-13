@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aviator Game Simulation</title>
+  <title>Aviator Game Simulation with Admin Panel</title>
   <link href="https://fonts.cdnfonts.com/css/binance-sans" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -23,6 +23,37 @@
       font-family: 'Binance Sans', sans-serif;
       background: var(--bg-color); color: var(--text-color);
     }
+    /* User Login & Game Container (from previous code) */
+    #login-container {
+      width: 90%; max-width: 480px;
+      margin: 50px auto;
+      background: var(--container-bg);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      text-align: center;
+    }
+    #login-container input {
+      width: 80%;
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: var(--border-radius);
+      border: none;
+      text-align: center;
+      font-size: 16px;
+    }
+    #login-container button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: var(--accent-color);
+      color: var(--text-color);
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #login-container button:hover { background: var(--hover-color); }
+    #game-container { display: none; }
     .container {
       width: 90%; max-width: 480px;
       margin: 20px auto; padding: 20px;
@@ -101,7 +132,7 @@
     button:hover { background: var(--hover-color); transform: scale(1.02); }
     button:disabled { background: #555; cursor: not-allowed; transform: none; }
     .next-crash, .result { text-align: center; margin-top: 10px; font-size: 18px; }
-    .next-crash { display: none; }
+    .next-crash { display: block; }
     .win { color: #00ff00; }
     .loss { color: #ff4444; }
     .virtual-players, .recent-multipliers {
@@ -139,86 +170,212 @@
       .balance-text { font-size: 16px; }
       button { font-size: 14px; padding: 8px 12px; }
     }
-    /* CSS class to hide elements (Next Crash container will disappear when this class is applied) */
-    .hidden {
-      display: none !important;
+    /* Admin Panel Styles */
+    #admin-container {
+      width: 90%; max-width: 480px;
+      margin: 40px auto;
+      background: var(--container-bg);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      text-align: center;
     }
+    #admin-container input {
+      width: 80%;
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: var(--border-radius);
+      border: none;
+      text-align: center;
+      font-size: 16px;
+    }
+    #admin-container button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: var(--accent-color);
+      color: var(--text-color);
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 10px;
+    }
+    #admin-container button:hover { background: var(--hover-color); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="account-header">
-      <div class="account-info">
-        <span class="account-icon">👤</span>
-        <div class="balance-container">
-          <span class="balance-text">Balance: UGX <span id="balance">10,000.00</span></span>
-        </div>
-      </div>
-      <div class="account-actions">
-        <button id="deposit-btn">Deposit</button>
-        <button id="withdraw-btn">Withdraw</button>
-      </div>
-    </div>
-    <div class="round-timer">
-      Next round starts in: <span id="countdown-timer">10</span> seconds
-    </div>
-    <div class="game-area">
-      <div class="multiplier-display" id="multiplier">1.00x</div>
-      <div class="airplane" id="airplane">⚽</div>
-    </div>
-    <div class="winnings">Potential Winnings: UGX <span id="winnings">0.00</span></div>
-    <div class="controls">
-      <div class="stakes">
-        <div class="bet-section">
-          <label for="bet-amount-1">Stake : Bet UGX</label>
-          <input type="number" id="bet-amount-1" min="1" value="10000">
-          <label for="auto-cashout-1">Auto Cash Out at</label>
-          <input type="number" id="auto-cashout-1" step="0.01" min="1.01" value="1.50">
-          <div class="toggle-container">
-            <label for="toggle-autocashout-1">Auto Cash Out</label>
-            <input type="checkbox" id="toggle-autocashout-1">
-          </div>
-          <div class="bet-buttons">
-            <button class="place-bet-btn" data-bet="1">Place Bet</button>
-            <button class="cashout-btn" id="cashout-btn-1" disabled>Cash Out</button>
+  <!-- User Login -->
+  <div id="login-container">
+    <h2>User Login</h2>
+    <form id="login-form">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="text" id="phone" placeholder="Phone Number" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+  
+  <!-- Game Container -->
+  <div id="game-container">
+    <div class="container">
+      <div class="account-header">
+        <div class="account-info">
+          <span class="account-icon">👤</span>
+          <div class="balance-container">
+            <span class="balance-text">Balance: UGX <span id="balance">0.00</span></span>
           </div>
         </div>
-        <div class="bet-section">
-          <label for="bet-amount-2">Stake : Bet UGX</label>
-          <input type="number" id="bet-amount-2" min="1" value="10000">
-          <label for="auto-cashout-2">Auto Cash Out at</label>
-          <input type="number" id="auto-cashout-2" step="0.01" min="1.01" value="2.00">
-          <div class="toggle-container">
-            <label for="toggle-autocashout-2">Auto Cash Out</label>
-            <input type="checkbox" id="toggle-autocashout-2">
-          </div>
-          <div class="bet-buttons">
-            <button class="place-bet-btn" data-bet="2">Place Bet</button>
-            <button class="cashout-btn" id="cashout-btn-2" disabled>Cash Out</button>
-          </div>
+        <div class="account-actions">
+          <button id="deposit-btn">Deposit</button>
+          <button id="withdraw-btn">Withdraw</button>
         </div>
       </div>
-      <button id="start-btn">Start Round Now</button>
-      <button id="cashout-all-btn" disabled>Cash Out All</button>
+      <div class="round-timer">
+        Next round starts in: <span id="countdown-timer">10</span> seconds
+      </div>
+      <div class="game-area">
+        <div class="multiplier-display" id="multiplier">1.00x</div>
+        <div class="airplane" id="airplane">⚽</div>
+      </div>
+      <div class="winnings">Potential Winnings: UGX <span id="winnings">0.00</span></div>
+      <div class="controls">
+        <div class="stakes">
+          <div class="bet-section">
+            <label for="bet-amount-1">Stake : Bet UGX</label>
+            <input type="number" id="bet-amount-1" min="1" value="100">
+            <label for="auto-cashout-1">Auto Cash Out at</label>
+            <input type="number" id="auto-cashout-1" step="0.01" min="1.01" value="1.50">
+            <div class="toggle-container">
+              <label for="toggle-autocashout-1">Auto Cash Out</label>
+              <input type="checkbox" id="toggle-autocashout-1">
+            </div>
+            <div class="bet-buttons">
+              <button class="place-bet-btn" data-bet="1">Place Bet</button>
+              <button class="cashout-btn" id="cashout-btn-1" disabled>Cash Out</button>
+            </div>
+          </div>
+          <div class="bet-section">
+            <label for="bet-amount-2">Stake : Bet UGX</label>
+            <input type="number" id="bet-amount-2" min="1" value="100">
+            <label for="auto-cashout-2">Auto Cash Out at</label>
+            <input type="number" id="auto-cashout-2" step="0.01" min="1.01" value="2.00">
+            <div class="toggle-container">
+              <label for="toggle-autocashout-2">Auto Cash Out</label>
+              <input type="checkbox" id="toggle-autocashout-2">
+            </div>
+            <div class="bet-buttons">
+              <button class="place-bet-btn" data-bet="2">Place Bet</button>
+              <button class="cashout-btn" id="cashout-btn-2" disabled>Cash Out</button>
+            </div>
+          </div>
+        </div>
+        <button id="start-btn">Start Round Now</button>
+        <button id="cashout-all-btn" disabled>Cash Out All</button>
+      </div>
+      <div class="next-crash">Next Crash: <span id="next-crash">?</span>x</div>
+      <div class="result" id="result"></div>
     </div>
-    <!-- Next Crash display -->
-    <div class="next-crash">Next Crash: <span id="next-crash">?</span>x</div>
-    <div class="result" id="result"></div>
+    <div class="virtual-players">
+      <h3>Live Bets</h3>
+      <ul id="players-list"></ul>
+    </div>
+    <div class="recent-multipliers">
+      <h3>Recent Multipliers</h3>
+      <ul id="multipliers-list"></ul>
+      <button id="save-pdf-btn">Save Multipliers as PDF</button>
+    </div>
+    <div id="loading-spinner">
+      <div class="spinner"></div>
+    </div>
   </div>
-  <div class="virtual-players">
-    <h3>Live Bets</h3>
-    <ul id="players-list"></ul>
+  
+  <!-- Admin Panel -->
+  <div id="admin-container">
+    <h2>Admin Panel</h2>
+    <!-- Admin Login -->
+    <div id="admin-login-container">
+      <form id="admin-login-form">
+        <input type="password" id="admin-password" placeholder="Enter Admin Password" required>
+        <button type="submit">Login as Admin</button>
+      </form>
+    </div>
+    <!-- Admin Settings (hidden until login) -->
+    <div id="admin-settings" style="display: none;">
+      <label for="new-deposit-password">New Deposit Password:</label>
+      <input type="text" id="new-deposit-password" placeholder="e.g. newpass123">
+      <label for="max-deposit-amount">Max Deposit Amount (UGX):</label>
+      <input type="number" id="max-deposit-amount" value="100000">
+      <button id="save-admin-settings">Save Settings</button>
+    </div>
   </div>
-  <div class="recent-multipliers">
-    <h3>Recent Multipliers</h3>
-    <ul id="multipliers-list"></ul>
-    <button id="save-pdf-btn">Save Multipliers as PDF</button>
-  </div>
-  <div id="loading-spinner">
-    <div class="spinner"></div>
-  </div>
+  
   <script>
-    let balance = 10000;
+    // ----- User Login & Persistence (from previous example) -----
+    let currentUser = null;
+    function saveUser() {
+      if (currentUser && currentUser.phone) {
+        localStorage.setItem("user_" + currentUser.phone, JSON.stringify(currentUser));
+      }
+    }
+    function loadUser(phone) {
+      let data = localStorage.getItem("user_" + phone);
+      return data ? JSON.parse(data) : null;
+    }
+    document.getElementById("login-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      if (username === "" || phone === "") {
+        alert("Please enter a valid username and phone number.");
+        return;
+      }
+      let user = loadUser(phone);
+      if (!user) {
+        user = { username, phone, balance: 0 };
+        localStorage.setItem("user_" + phone, JSON.stringify(user));
+      }
+      currentUser = user;
+      balance = currentUser.balance;
+      balanceDisplay.textContent = formatCurrency(balance);
+      document.getElementById("login-container").style.display = "none";
+      document.getElementById("game-container").style.display = "block";
+    });
+    
+    // ----- Admin Panel Variables & Logic -----
+    // Global variables for deposit settings
+    let depositPassword = "Dan123";  // default deposit password
+    let maxDepositAmount = 10000;   // default maximum deposit allowed
+    // Default admin password for accessing the admin panel
+    const adminAccessPassword = "admin123";
+    
+    // Handle admin login form submission
+    document.getElementById("admin-login-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const enteredAdminPassword = document.getElementById("admin-password").value.trim();
+      if (enteredAdminPassword === adminAccessPassword) {
+        document.getElementById("admin-login-container").style.display = "none";
+        document.getElementById("admin-settings").style.display = "block";
+      } else {
+        alert("Incorrect admin password!");
+      }
+    });
+    
+    // Handle admin settings save
+    document.getElementById("save-admin-settings").addEventListener("click", function() {
+      const newDepositPass = document.getElementById("new-deposit-password").value.trim();
+      const newMaxDeposit = parseFloat(document.getElementById("max-deposit-amount").value);
+      if (newDepositPass === "" || isNaN(newMaxDeposit) || newMaxDeposit <= 0) {
+        alert("Please enter a valid deposit password and maximum deposit amount.");
+        return;
+      }
+      depositPassword = newDepositPass;
+      maxDepositAmount = newMaxDeposit;
+      alert("Admin settings updated successfully!");
+      // Clear the input fields
+      document.getElementById("new-deposit-password").value = "";
+    });
+    
+    // ----- Game & Simulation Code -----
+    let balance = 0; // will be overwritten upon user login
     let multiplier = 1.0;
     let simulationInterval;
     let roundCountdownInterval;
@@ -248,7 +405,6 @@
     const multipliersList = document.getElementById('multipliers-list');
     const savePdfBtn = document.getElementById('save-pdf-btn');
     
-    // Formats a number as currency with two decimals.
     function formatCurrency(amount) {
       return amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
@@ -256,15 +412,13 @@
     function showLoadingSpinner() { loadingSpinner.style.display = 'block'; }
     function hideLoadingSpinner() { loadingSpinner.style.display = 'none'; }
     
-    // Generates a random crash multiplier.
     function generateCrashMultiplier() {
-      const maxMultiplier = 100000;
+      const maxMultiplier = 500;
       const u = Math.random() * (1 - 1 / maxMultiplier);
       const m = 1 / (1 - u);
       return parseFloat(m.toFixed(2));
     }
     
-    // Updates the potential winnings display.
     function updateWinnings() {
       if (bets.length > 0) {
         let totalPotential = 0;
@@ -277,40 +431,28 @@
       }
     }
     
-    // Updates the list of recent multipliers.
     function updateMultipliersList() {
       multipliersList.innerHTML = "";
       for (let i = recentMultipliers.length - 1; i >= 0; i--) {
         const li = document.createElement("li");
         li.textContent = recentMultipliers[i].multiplier.toFixed(2);
-        if (recentMultipliers[i].status === 'win') { 
-          li.style.color = 'green'; 
-        } else if (recentMultipliers[i].status === 'loss') { 
-          li.style.color = 'red'; 
-        } else { 
-          li.style.color = 'white'; 
-        }
+        li.style.color = recentMultipliers[i].status === 'win' ? 'green' : (recentMultipliers[i].status === 'loss' ? 'red' : 'white');
         multipliersList.appendChild(li);
       }
     }
     
-    // Update the Next Crash display with the upcoming crash multiplier.
     function updateNextCrashDisplay() {
       nextCrashDisplay.textContent = nextCrashMultiplier.toFixed(2);
     }
     
-    // Function to hide the Next Crash display.
     function removeNextCrashDisplay() {
-      // Hide the entire container by adding a CSS class.
       nextCrashDisplay.parentElement.classList.add('hidden');
     }
     
-    // Function to bring back the Next Crash display.
     function bringBackNextCrashDisplay() {
       nextCrashDisplay.parentElement.classList.remove('hidden');
     }
     
-    // Starts the round simulation.
     function startRoundProcess() {
       crashed = false;
       multiplier = 1.0;
@@ -319,7 +461,6 @@
       multiplierDisplay.textContent = `${multiplier.toFixed(2)}x`;
       winningsDisplay.textContent = bets.length > 0 ? formatCurrency(bets.reduce((total, bet) => total + (bet.amount * multiplier), 0)) : "0.00";
       
-      // Reset animations and positions.
       airplane.classList.remove("crashed");
       multiplierDisplay.classList.remove("stopped");
       airplane.style.bottom = `10%`;
@@ -332,19 +473,13 @@
       clearInterval(roundCountdownInterval);
       countdownTimerDisplay.textContent = "0";
       
-      // Update the Next Crash display.
       updateNextCrashDisplay();
       
       simulationInterval = setInterval(() => {
-        if (multiplier < 2) { 
-          multiplier = multiplier * (1 + Math.random() * 0.015); 
-        } else { 
-          multiplier = multiplier * (1 + Math.random() * 0.045); 
-        }
+        multiplier = multiplier < 2 ? multiplier * (1 + Math.random() * 0.015) : multiplier * (1 + Math.random() * 0.045);
         multiplierDisplay.textContent = `${multiplier.toFixed(2)}x`;
         updateWinnings();
         
-        // Animate airplane movement within container bounds.
         const container = document.querySelector('.game-area');
         const containerHeight = container.offsetHeight;
         const airplaneHeight = airplane.offsetHeight;
@@ -365,7 +500,6 @@
         else if (newLeft <= minLeftPercent) { newLeft = minLeftPercent; ballDirectionX = 1; }
         airplane.style.left = `${newLeft}%`;
         
-        // Check auto cash out conditions for each bet.
         bets.forEach(bet => {
           if (!bet.hasCashedOut && bet.autoEnabled && multiplier >= bet.autoCashOut) {
             bet.lockedMultiplier = multiplier;
@@ -375,6 +509,8 @@
             balanceDisplay.textContent = formatCurrency(balance);
             resultDisplay.innerHTML += `<br><span class="win">Bet ${bet.id}: Auto cashed out at ${multiplier.toFixed(2)}x! Won UGX ${formatCurrency(winnings)}.</span>`;
             document.getElementById('cashout-btn-' + bet.id).disabled = true;
+            currentUser.balance = balance;
+            saveUser();
           }
         });
         
@@ -384,7 +520,6 @@
       }, 100);
     }
     
-    // Handles the crash scenario.
     function crash() {
       crashed = true;
       clearInterval(simulationInterval);
@@ -402,17 +537,14 @@
       document.querySelectorAll('.place-bet-btn').forEach(btn => btn.disabled = false);
       document.querySelectorAll('.cashout-btn').forEach(btn => btn.disabled = true);
       
-      // Generate and update a new next crash multiplier.
       nextCrashMultiplier = generateCrashMultiplier();
       updateNextCrashDisplay();
       
-      // Trigger animations for multiplier stop and plane crash.
       multiplierDisplay.classList.add("stopped");
       airplane.classList.add("crashed");
       setTimeout(startCountdown, 3000);
     }
     
-    // Countdown before starting the next round.
     function startCountdown() {
       roundCountdownTime = 7;
       countdownTimerDisplay.textContent = roundCountdownTime;
@@ -426,7 +558,6 @@
       }, 1000);
     }
     
-    // Event listeners for placing bets.
     document.querySelectorAll('.place-bet-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const betId = this.dataset.bet;
@@ -450,6 +581,8 @@
         }
         balance -= betAmount;
         balanceDisplay.textContent = formatCurrency(balance);
+        currentUser.balance = balance;
+        saveUser();
         const bet = { id: betId, amount: betAmount, autoCashOut: autoCashOutValue, autoEnabled: autoEnabled, hasCashedOut: false, lockedMultiplier: 0 };
         bets.push(bet);
         this.disabled = true;
@@ -468,6 +601,8 @@
         balanceDisplay.textContent = formatCurrency(balance);
         resultDisplay.innerHTML += `<br><span class="win">Bet ${bet.id}: Manually cashed out at ${multiplier.toFixed(2)}x! Won UGX ${formatCurrency(winnings)}.</span>`;
         document.getElementById('cashout-btn-1').disabled = true;
+        currentUser.balance = balance;
+        saveUser();
       }
     });
     
@@ -481,41 +616,55 @@
         balanceDisplay.textContent = formatCurrency(balance);
         resultDisplay.innerHTML += `<br><span class="win">Bet ${bet.id}: Manually cashed out at ${multiplier.toFixed(2)}x! Won UGX ${formatCurrency(winnings)}.</span>`;
         document.getElementById('cashout-btn-2').disabled = true;
+        currentUser.balance = balance;
+        saveUser();
       }
     });
     
-    // Modified deposit event listener:
+    // Updated deposit listener using the depositPassword and maxDepositAmount variables.
     depositBtn.addEventListener('click', () => {
-      // Prompt the user to input their password before depositing.
-      const enteredPassword = prompt("Enter your password to deposit money:");
-      // For demonstration, we use a hard-coded password. Replace "1234" with your desired password.
-      const requiredPassword = "1234";
-      if (enteredPassword !== requiredPassword) {
-        alert("Incorrect password! Deposit canceled.");
+      const enteredDepPass = prompt("Enter deposit password:");
+      if (enteredDepPass !== depositPassword) {
+        alert("Incorrect deposit password! Deposit canceled.");
         return;
       }
-      // If password is correct, proceed with deposit.
       const depositAmount = prompt("Enter deposit amount (UGX):");
       const amount = parseFloat(depositAmount);
-      if (!isNaN(amount) && amount > 0) {
-        balance += amount;
-        balanceDisplay.textContent = formatCurrency(balance);
-        alert(`Deposit of UGX ${amount.toFixed(2)} successful!`);
-      } else { 
-        alert("Invalid deposit amount!"); 
+      if (isNaN(amount) || amount <= 0) {
+        alert("Invalid deposit amount!");
+        return;
       }
+      if (amount > maxDepositAmount) {
+        alert("Deposit amount exceeds the maximum allowed of UGX " + formatCurrency(maxDepositAmount));
+        return;
+      }
+      balance += amount;
+      balanceDisplay.textContent = formatCurrency(balance);
+      currentUser.balance = balance;
+      saveUser();
+      alert(`Deposit of UGX ${amount.toFixed(2)} successful!`);
     });
     
     withdrawBtn.addEventListener('click', () => {
-      const withdrawAmount = prompt("Enter withdrawal amount (UGX):");
+      const withdrawAmount = prompt("Enter the withdrawal amount (UGX):");
       const amount = parseFloat(withdrawAmount);
-      if (!isNaN(amount) && amount > 0 && amount <= balance) {
-        balance -= amount;
-        balanceDisplay.textContent = formatCurrency(balance);
-        alert(`Withdrawal of UGX ${amount.toFixed(2)} successful!`);
-      } else { 
-        alert("Invalid or insufficient funds for withdrawal!"); 
+      if (isNaN(amount) || amount <= 0) {
+        alert("Invalid withdrawal amount!");
+        return;
       }
+      if (amount < 1000) {
+        alert("The minimum withdrawal amount is UGX 1,000!");
+        return;
+      }
+      if (amount > balance) {
+        alert("Withdrawal amount exceeds your balance!");
+        return;
+      }
+      balance -= amount;
+      balanceDisplay.textContent = formatCurrency(balance);
+      currentUser.balance = balance;
+      saveUser();
+      alert("Withdrawal of UGX " + formatCurrency(amount) + " has been processed successfully!");
     });
     
     savePdfBtn.addEventListener('click', () => {
@@ -531,12 +680,8 @@
       doc.save("recent_multipliers.pdf");
     });
     
-    // Start the first countdown.
+    // Start the first countdown once logged in.
     startCountdown();
-    
-    // For testing purposes you can call these functions in the console:
-    // removeNextCrashDisplay(); // Hides the Next Crash display.
-    // bringBackNextCrashDisplay(); // Shows the Next Crash display.
     
   </script>
 </body>
