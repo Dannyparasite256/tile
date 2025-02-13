@@ -151,7 +151,7 @@
       <div class="account-info">
         <span class="account-icon">👤</span>
         <div class="balance-container">
-          <span class="balance-text">Balance: UGX <span id="balance">100,000.00</span></span>
+          <span class="balance-text">Balance: UGX <span id="balance">0.00</span></span>
         </div>
       </div>
       <div class="account-actions">
@@ -217,7 +217,7 @@
   <div id="loading-spinner">
     <div class="spinner"></div>
   </div>
-      <script>
+  <script>
     let balance = 100000;
     let multiplier = 1.0;
     let simulationInterval;
@@ -484,7 +484,17 @@
       }
     });
     
+    // Modified deposit event listener:
     depositBtn.addEventListener('click', () => {
+      // Prompt the user to input their password before depositing.
+      const enteredPassword = prompt("Enter your password to deposit money:");
+      // For demonstration, we use a hard-coded password. Replace "1234" with your desired password.
+      const requiredPassword = "1234";
+      if (enteredPassword !== requiredPassword) {
+        alert("Incorrect password! Deposit canceled.");
+        return;
+      }
+      // If password is correct, proceed with deposit.
       const depositAmount = prompt("Enter deposit amount (UGX):");
       const amount = parseFloat(depositAmount);
       if (!isNaN(amount) && amount > 0) {
@@ -497,7 +507,7 @@
     });
     
     withdrawBtn.addEventListener('click', () => {
-      const withdrawAmount = prompt("Enter withdraw amount (UGX):");
+      const withdrawAmount = prompt("Enter withdrawal amount (UGX):");
       const amount = parseFloat(withdrawAmount);
       if (!isNaN(amount) && amount > 0 && amount <= balance) {
         balance -= amount;
@@ -531,4 +541,3 @@
   </script>
 </body>
 </html>
-    
