@@ -130,6 +130,8 @@
                             <button id="alternative-button" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition duration-300 text-sm">✨ Alt. Scenario</button>
                             <button id="journal-button" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition duration-300 text-sm">✨ Create Journal</button>
                             <button id="events-button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition duration-300 text-sm">✨ Upcoming Events</button>
+                            <button id="mindset-button" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition duration-300 text-sm">✨ Mindset Check</button>
+                            <button id="correlation-button" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition duration-300 text-sm">✨ Correlation Check</button>
                         </div>
                     </div>
                 </div>
@@ -189,6 +191,8 @@
         const alternativeButton = document.getElementById('alternative-button');
         const journalButton = document.getElementById('journal-button');
         const eventsButton = document.getElementById('events-button');
+        const mindsetButton = document.getElementById('mindset-button');
+        const correlationButton = document.getElementById('correlation-button');
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
         const modalTitle = document.getElementById('modal-title');
@@ -273,26 +277,16 @@
             }
         }
         
-        /**
-         * FIX: Extracts a JSON string from a larger string that might contain markdown.
-         * @param {string} text - The raw text from the AI response.
-         * @returns {string} - A clean JSON string.
-         */
         function extractJson(text) {
-            // First, try to find the content within ```json ... ```
             const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
             if (jsonMatch && jsonMatch[1]) {
                 return jsonMatch[1];
             }
-
-            // If that fails, find the first '{' and last '}'
             const firstBracket = text.indexOf('{');
             const lastBracket = text.lastIndexOf('}');
             if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
                 return text.substring(firstBracket, lastBracket + 1);
             }
-
-            // If no JSON object is found, return the original text to let JSON.parse fail with a clear error
             return text;
         }
 
@@ -326,12 +320,12 @@
             if (imageData) userParts.push({ inlineData: { mimeType: mimeType, data: imageData } });
 
             const payload = { contents: [{ role: "user", parts: userParts }] };
-            const apiKey = ""; // Handled by environment
+            const apiKey = "AIzaSyC-PFfXPBsvdghkAYPuqLyDdrGVJDBfSbo"; // API Key inserted
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}. Please check the console or try again. The AI response might not be valid JSON.`);
                 const result = await response.json();
                 
                 const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -347,7 +341,7 @@
                 console.error("Error during analysis:", error);
                 const errorData = {
                     decision: 'Unclear',
-                    reasoning: `An error occurred: ${error.message}. Please check the console or try again. The AI response might not be valid JSON.`
+                    reasoning: `An error occurred: ${error.message}`
                 };
                 displaySummary(errorData);
             } finally {
@@ -361,7 +355,7 @@
             modalBody.innerHTML = '<div class="flex justify-center items-center h-full"><svg class="animate-spin h-8 w-8 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>';
             
             const payload = { contents: [{ role: "user", parts: [{text: prompt}] }] };
-            const apiKey = "";
+            const apiKey = "AIzaSyC-PFfXPBsvdghkAYPuqLyDdrGVJDBfSbo"; // API Key inserted
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
             try {
@@ -443,6 +437,16 @@
                 - Lessons Learned: [What went well? What could be improved?]
             `;
             getAdvancedAnalysis(prompt, 'Trade Journal Entry');
+        });
+
+        mindsetButton.addEventListener('click', () => {
+            const prompt = `You are a trading psychology coach. The user is considering a '${currentAnalysis.decision}' trade on ${currentAnalysis.currencyPair}. Provide 3 critical, introspective questions they should ask themselves before entering this trade to ensure they are in a clear, disciplined mindset and not trading emotionally (e.g., FOMO, revenge, greed).`;
+            getAdvancedAnalysis(prompt, 'Mindset Check');
+        });
+        
+        correlationButton.addEventListener('click', () => {
+            const prompt = `You are a market analyst. The current trade idea is a '${currentAnalysis.decision}' on ${currentAnalysis.currencyPair}. Identify a key correlated market/instrument (like DXY for USD pairs, Oil for CAD, or a major stock index for risk sentiment). Briefly analyze this correlated instrument's recent trend and explain how it could either support or contradict the proposed trade on ${currentAnalysis.currencyPair}.`;
+            getAdvancedAnalysis(prompt, 'Correlation Check');
         });
 
         chartUploadLabel.addEventListener('click', () => chartUploadInput.click());
